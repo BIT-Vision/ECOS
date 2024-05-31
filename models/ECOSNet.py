@@ -89,7 +89,7 @@ class ECOSNet(nn.Module):
                     'frame': frames[:, t - 1],  # [B x 5 x H x W]
                     'obj_mask': obj_masks[:, t - 1, 1:]
                 }
-                v16, ref_states, _ = self.extract_ref_feats(ref_pairs, ref_states)
+                v16, ref_states = self.extract_ref_feats(ref_pairs, ref_states)
                 total_value = torch.cat([total_value, v16.unsqueeze(3)], dim=3)
 
                 idx_list = list(range(t))
