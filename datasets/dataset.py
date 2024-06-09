@@ -93,7 +93,7 @@ class DataTrain(data.Dataset):
             voxel = torch.from_numpy(voxel)
             voxel, mask = self.resize(voxel, mask)
 
-            voxel, mask, ret = self.random_affine(voxel, mask, ret)
+            voxel, mask, ret = self.random_affine(voxel, mask)
             mask = np.array(mask, np.uint8)
 
             if i == 0:
