@@ -29,6 +29,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--checkpoint', default='', help='path to the pretrained checkpoint')
+    parser.add_argument('--seed', default=1024, type=int)
 
     parser.add_argument('--exp_name', default='ecos', help='exp name')
     parser.add_argument('--log_dir', default='logs/', help='log_dir file')
@@ -68,21 +69,25 @@ def main():
 
     dataloaders = {'train': train_dataloader}
 
-    params = [params for name, params in model.named_parameters() if params.requires_grad]
+    params = [params for name, params in model.named_parameters() if params.requires_grad and 'seg_backbone' not in name]
+    seg_params = [params for name, params in model.named_parameters() if params.requires_grad and 'seg_backbone' in name]
     optimizer = torch.optim.AdamW([{
         'params': params,
         'lr': cfg.TRAIN.LR,
         'weight_decay': cfg.TRAIN.WEIGHT_DECAY,
         'names': "params"
+    }, {
+        'params': seg_params,
+        'lr': cfg.TRAIN.LR,
+        'weight_decay': cfg.TRAIN.WEIGHT_DECAY,
+        'names': "other_params"
     }])
 
     start_epoch = 0
     if args.checkpoint:
         if os.path.exists(args.checkpoint):
             logger.info('Loading state dict from: {0}'.format(args.checkpoint))
-            model, optimizer, start_epoch = load_checkpoint(model=model,
-                                                            model_file=args.checkpoint,
-                                                            optimizer=optimizer)
+            model, optimizer, start_epoch = load_checkpoint(model=model, model_file=args.checkpoint, optimizer=optimizer)
         else:
             raise ValueError("Cannot find model file at {}".format(args.checkpoint))
 
@@ -147,12 +152,9 @@ def train(args, model, train_dataloader, optimizer, device, summary_writer, star
                 desc = f'[LR:{lr:.7f} | {phase}_Loss:{loss_meter[phase].avg:.4f} | {phase}_CLS:{cls_meter[phase].avg:.4f} | {phase}_IOU:{iou_meter[phase].avg:.4f}]'
                 pbar.desc = desc
                 if log_iter[phase] % tblog_iter[phase] == 0:
-                    summary_writer.add_scalar(f'{phase}_Loss', loss_meter[phase].avg,
-                                              log_iter[phase] // tblog_iter[phase])
-                    summary_writer.add_scalar(f'{phase}_CLS', cls_meter[phase].avg,
-                                              log_iter[phase] // tblog_iter[phase])
-                    summary_writer.add_scalar(f'{phase}_IOU', iou_meter[phase].avg,
-                                              log_iter[phase] // tblog_iter[phase])
+                    summary_writer.add_scalar(f'{phase}_Loss', loss_meter[phase].avg, log_iter[phase] // tblog_iter[phase])
+                    summary_writer.add_scalar(f'{phase}_CLS', cls_meter[phase].avg, log_iter[phase] // tblog_iter[phase])
+                    summary_writer.add_scalar(f'{phase}_IOU', iou_meter[phase].avg, log_iter[phase] // tblog_iter[phase])
                     logger.info(
                         f'Phase: {phase} Epoch: [{epoch + 1} | {cfg.TRAIN.EPOCH}] | Iter: [{log_iter[phase]} | {all_iter[phase]}] | '
                         + desc)
@@ -169,8 +171,7 @@ def train(args, model, train_dataloader, optimizer, device, summary_writer, star
                             'train_CLS': cls_meter['train'].avg,
                             'train_IOU': iou_meter['train'].avg,
                             'optimizer': optimizer.state_dict()
-                        },
-                        model_path)
+                        }, model_path)
                     logger.info("Backup model at: {}".format(model_path))
 
 

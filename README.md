@@ -68,16 +68,16 @@ davis_event
 ## Training
 
 ### Training on EOS or DAVIS_Event dataset
-Download encoder [checkpoint](https://drive.google.com/file/d/1HM1q0nWCWHdUcd8003u7w1LDfoxun0wH/view?usp=share_link). To train the ECOSNet on EOS or DAVIS_Event dataset, just modify the dataset root `$cfg.DATA.NEUROMORPHIC_ROOT` and `$cfg.TRAIN.ENCODER_PATH` in `config.py`, then run following command.
+To train the ECOSNet on EOS or DAVIS_Event dataset, just modify the dataset root `$cfg.DATA.ROOT` in `config.py`, then run following command.
 ```bash
 python train.py --gpu ${GPU-IDS} --exp_name ${experiment}
 ```
-## Testing
-Download the model pretrained on EOS dataset [checkpoint](https://drive.google.com/file/d/1AiLJFhvRvvHfQ_qFB2HcJpUcYjkyYNcg/view?usp=share_link) and on DAVIS_Event dataset [checkpoint](https://drive.google.com/file/d/1dhF0XvJQkA21bFBDoBnyrh_Z3uwdbIEL/view?usp=share_link).
+## Inferencing
+Download the model pretrained [checkpoint](https://drive.google.com/file/d/1opse5lHwVkz4nGClwP3VgWgSQnaQzzIq/view?usp=drive_link) on EOS dataset or [checkpoint](https://drive.google.com/file/d/1RMI0DgjAbpOizIMgvC4GT0qQVVmu27x_/view?usp=sharing) on DAVIS_Event dataset.
 
-To eval the ECOSNet network on (EOS Dataset or DAVIS_Event), modify `$cfg.DATA.NEUROMORPHIC_ROOT`, then run following command
+To eval the ECOSNet network on EOS or DAVIS_Event Dataset, modify `$cfg.DATA.ROOT`, then run following command
 ```bash
-python eval.py --checkpoint ${./checkpoint/EOS_best.pth.tar} --results ${./results/EOS}
+python inference.py --checkpoint ${./checkpoint/ECOS.pth} --results ${./results/EOS}
 ```
 The results will be saved as indexed png file at `${results}/`.
 
