@@ -40,7 +40,7 @@ class DataTrain(data.Dataset):
             self.data = json.load(f)
 
         self.video_name_list = list()
-
+        self.data_len = 0
         with open(os.path.join(root, imset), 'r') as lines:
             for line in lines:
                 video_name = line.strip()
